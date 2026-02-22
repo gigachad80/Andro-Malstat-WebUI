@@ -1,1 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Malware Analyzer</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+
+<body>
+    <div class="background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <div class="page">
+        <header class="hero">
+            <div class="hero-main">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i data-lucide="shield-alert"></i>
+                    </div>
+                    <div>
+                        <h1>Andro-Malstat</h1>
+                        <p class="muted">Hybrid Static Analysis & Malware Triage</p>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span id="systemStatus">Ready to Scan</span>
+                    </div>
+                    <button class="theme-button hidden" id="exportBtn" onclick="exportReport()">
+                        <i data-lucide="download"></i>
+                        <span>JSON</span>
+                    </button>
+                    <button class="theme-button" id="themeToggle">
+                        <i data-lucide="moon"></i>
+                        <span>Theme</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="grid">
+                <article class="card">
+                    <div class="card-header">
+                        <i data-lucide="upload-cloud"></i>
+                        <h2>Upload APK</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <input type="file" id="fileInput" class="input-field" accept=".apk">
+                        </div>
+                        <button class="btn" id="scanBtn" onclick="startScan()">
+                            <i data-lucide="search"></i>
+                            Start Analysis
+                        </button>
+                    </div>
+                </article>
+
+                <article class="card" id="scoreCard" style="opacity: 0.6;">
+                    <div class="card-header">
+                        <i data-lucide="gauge"></i>
+                        <h2>Risk Assessment</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="riskDisplay" style="text-align: center; padding: 10px;">
+                            <h3 class="muted">Waiting for scan...</h3>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="card">
+                    <div class="card-header">
+                        <i data-lucide="info"></i>
+                        <h2>File Info</h2>
+                    </div>
+                    <div class="card-body" id="fileInfoDisplay">
+                        <p class="muted">No file loaded.</p>
+                    </div>
+                </article>
+            </section>
+
+            <div id="loader" class="hidden">
+                <div class="loading-spinner"></div>
+                <p style="text-align: center; margin-top: 10px;" class="muted">Decompiling & Scanning...</p>
+            </div>
+
+            <!-- Meta Information Card -->
+            <section class="card wide hidden" id="metaCard">
+                <div class="card-header">
+                    <i data-lucide="database"></i>
+                    <h2>Meta Information</h2>
+                </div>
+                <div class="card-body" id="metaInfo"></div>
+            </section>
+
+            <!-- Critical Findings Card -->
+            <section class="card wide hidden" id="findingsCard">
+                <div class="card-header">
+                    <i data-lucide="alert-triangle"></i>
+                    <h2>Critical Findings</h2>
+                </div>
+                <div class="card-body">
+                    <ul id="findingsList" style="list-style: none; color: var(--md-sys-color-error);"></ul>
+                </div>
+            </section>
+
+            <!-- Permissions Card -->
+            <section class="card wide hidden" id="permissionsCard">
+                <div class="card-header">
+                    <i data-lucide="lock"></i>
+                    <h2>Permissions</h2>
+                </div>
+                <div class="card-body">
+                    <div id="permsList" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+                </div>
+            </section>
+
+            <!-- Components Card -->
+            <section class="card wide hidden" id="componentsCard">
+                <div class="card-header">
+                    <i data-lucide="box"></i>
+                    <h2>App Components</h2>
+                </div>
+                <div class="card-body">
+                    <div class="report-grid">
+                        <div class="report-section">
+                            <h3><i data-lucide="smartphone"></i> Activities</h3>
+                            <ul id="activitiesList" style="list-style: none; margin-top: 10px;"></ul>
+                        </div>
+                        <div class="report-section">
+                            <h3><i data-lucide="settings"></i> Services</h3>
+                            <ul id="servicesList" style="list-style: none; margin-top: 10px;"></ul>
+                        </div>
+                        <div class="report-section">
+                            <h3><i data-lucide="radio"></i> Receivers</h3>
+                            <ul id="receiversList" style="list-style: none; margin-top: 10px;"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dangerous APIs Card -->
+            <section class="card wide hidden" id="apisCard">
+                <div class="card-header">
+                    <i data-lucide="code"></i>
+                    <h2>Dangerous APIs</h2>
+                </div>
+                <div class="card-body" id="apisList"></div>
+            </section>
+
+            <!-- Secrets/IOCs Card -->
+            <section class="card wide hidden" id="secretsCard">
+                <div class="card-header">
+                    <i data-lucide="globe"></i>
+                    <h2>Network & Secrets</h2>
+                </div>
+                <div class="card-body">
+                    <pre id="secretsList" class="secrets-box"></pre>
+                </div>
+            </section>
+
+            <!-- Native Libraries Card -->
+            <section class="card wide hidden" id="nativeCard">
+                <div class="card-header">
+                    <i data-lucide="cpu"></i>
+                    <h2>Native Libraries</h2>
+                </div>
+                <div class="card-body">
+                    <ul id="nativeLibsList" style="list-style: none;"></ul>
+                </div>
+            </section>
+
+            <!-- Nested APKs Card -->
+            <section class="card wide hidden" id="nestedCard">
+                <div class="card-header">
+                    <i data-lucide="package"></i>
+                    <h2>Nested APKs/DEX</h2>
+                </div>
+                <div class="card-body">
+                    <ul id="nestedList" style="list-style: none;"></ul>
+                </div>
+            </section>
+
+            <!-- YARA Matches Card -->
+            <section class="card wide hidden" id="yaraCard">
+                <div class="card-header">
+                    <i data-lucide="shield-check"></i>
+                    <h2>YARA Signature Matches</h2>
+                </div>
+                <div class="card-body">
+                    <ul id="yaraList" style="list-style: none; color: var(--md-sys-color-error);"></ul>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer"
+            style="text-align: center; padding-top: 20px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+            <p class="muted">Powered by Androguard & YARA</p>
+        </footer>
+    </div>
+    <script src="static/js/script.js"></script>
+</body>
+
+</html>
