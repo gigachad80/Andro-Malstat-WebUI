@@ -145,7 +145,7 @@ yara_rules/
   joker.yar
   your_custom_rule.yar
 ```
-
+```
 yara_rules/
 │   ├── ania-analysis.yar
 │   ├── bank_overlay.yar
@@ -161,7 +161,7 @@ yara_rules/
 │   ├── rat888.yar
 │   ├── spynote.yar
 │   └── venom_rat.yar
-
+```
 ### Built-in YARA Rules
 
 If no `yara_rules/` directory exists, the tool uses these internal signatures:
