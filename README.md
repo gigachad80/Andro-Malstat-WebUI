@@ -1,6 +1,6 @@
 <div align="center">
 
-# Andro-MalStat
+# Andro-MalStat WebUI
 
 **Static analysis engine for Android APKs.**
 
@@ -106,4 +106,8 @@ waitress-serve --port=5000 app:app
 
 ## License
 
-MIT
+GNU-AGPL 3.0
+
+## Contact : 
+
+pookielinuxuser@tutamail.com
