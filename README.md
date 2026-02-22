@@ -1,6 +1,6 @@
 <div align="center">
 
-# Andro-MalStat WebUI
+# Andro-MalStat
 
 **Static analysis engine for Android APKs.**
 
@@ -21,12 +21,15 @@ Upload an APK, get a full malware triage report — permissions, dangerous APIs,
 - [Features](#features)
 - [Stack](#stack)
 - [Quick Start](#quick-start)
-- [API Reference](#api-reference)
+- [Analysis Phases](#analysis-phases)
 - [Adding YARA Rules](#adding-yara-rules)
-- [Project Structure](#project-structure)
+- [API Reference](#api-reference)
 - [Deployment](#deployment)
 - [License](#license)
 
+ > [!TIP]
+> #### Prefer the terminal? Also check out the [Andro-Malstat CLI](https://github.com/gigachad80/Andro-Malstat-CLI) for automation
+  
 ## Features
 
 - **Hybrid code analysis** — bytecode tracing + raw string scraping catches obfuscated malware that single-method scanners miss
@@ -57,6 +60,71 @@ python app.py
 
 Open `http://localhost:5000`. Upload an APK. Wait for the report.
 
+
+## Analysis Phases
+
+### Phase 1: File Profiling
+- MD5, SHA1, SHA256 hash calculation
+- File size and entropy analysis
+- Packing/encryption detection
+
+### Phase 2: Androguard Loading
+- DEX bytecode parsing
+- Animated progress indicator
+- Fallback for corrupted APKs
+
+### Phase 3: Manifest & Certificate
+- Certificate chain validation
+- Debug certificate detection
+- Dangerous permission enumeration
+- Component analysis (activities, services, receivers, providers)
+- Boot persistence detection
+
+### Phase 4: Obfuscation Detection
+- ProGuard/R8 detection via class name entropy
+- Average name length calculation
+- Obfuscation ratio metrics
+
+### Phase 5: Hybrid Code Analysis
+- Bytecode API tracing for accurate detection
+- Raw string pattern matching for obfuscated code
+- Detection of:
+  - Encryption APIs
+  - Command execution
+  - SMS operations
+  - Dynamic code loading
+  - Reflection usage
+  - Admin abuse
+
+### Phase 6: Native & Nested Analysis
+- Native library (.so) enumeration
+- Shell payload detection in native code
+- Nested APK/DEX dropper identification
+
+### Phase 7: Network Security Config
+- network_security_config.xml parsing
+- Cleartext traffic permission detection
+- MITM vulnerability assessment
+
+### Phase 8: Anti-Analysis Detection
+- Debugger detection
+- Emulator detection
+- Root detection
+- Frida/instrumentation detection
+
+### Phase 9: YARA Scan
+- Malware signature matching
+- Severity-based scoring
+- Custom rule support
+
+### Phase 10: Final Report
+- Risk score calculation
+- Severity classification (CRITICAL, HIGH, MEDIUM, LOW)
+- JSON report generation
+260130_143022.json
+
+
+
 ## API Reference
 
 | Method | Endpoint | Description |
@@ -76,6 +144,46 @@ yara_rules/
   spynote.yar
   joker.yar
   your_custom_rule.yar
+```
+
+yara_rules/
+│   ├── ania-analysis.yar
+│   ├── bank_overlay.yar
+│   ├── clayrat.yar
+│   ├── commercial.yar
+│   ├── craxs.yar
+│   ├── crypto.yar
+│   ├── cypher.yar
+│   ├── dropper.yar
+│   ├── joker.yar
+│   ├── lemon.yar
+│   ├── ransomware.yar
+│   ├── rat888.yar
+│   ├── spynote.yar
+│   └── venom_rat.yar
+
+### Built-in YARA Rules
+
+If no `yara_rules/` directory exists, the tool uses these internal signatures:
+
+- **Suspicious_Overlay_Attack** - Banking trojan overlay patterns
+- **APK_Dropper_Payload** - Nested APK detection
+- **Native_Shell_Execution** - Shell command execution
+- **Crypto_Ransomware_Pattern** - Encryption operations
+
+### Custom YARA Rules Format
+
+```yara
+rule Your_Custom_Rule {
+    meta:
+        description = "Description of the malware"
+        severity = "high"  // critical, high, medium, low
+    strings:
+        $a = "malicious_string"
+        $b = "suspicious_api"
+    condition:
+        any of them
+}
 ```
 
 ## Project Structure
@@ -106,8 +214,17 @@ waitress-serve --port=5000 app:app
 
 ## License
 
-GNU-AGPL 3.0
+GNU - AGPL 3.0
 
-## Contact : 
+---
 
-pookielinuxuser@tutamail.com
+**Made with Python** - Advanced static analysis for Android security research.
+
+
+--- 
+
+Contact : pookielinuxuser@tutamail.com
+
+First Released : February 22nd 2026
+
+Last updated : February 22nd 2026
