@@ -76,8 +76,8 @@ class UltimateAnalyzer:
         self.yara_rules = self._compile_yara()
 
     def _compile_yara(self):
-        """Compiles YARA rules for malware signatures"""
-        rules = """
+        """Compiles YARA rules: built-in signatures + all .yar files from yara_rules/ directory"""
+        builtin_rules = """
         rule Suspicious_Banker {
             strings:
                 $a = "WindowManager$LayoutParams"
@@ -86,7 +86,7 @@ class UltimateAnalyzer:
             condition:
                 all of them
         }
-        rule Ransomware_ Indicators {
+        rule Ransomware_Indicators {
             strings:
                 $a = "decrypt" nocase
                 $b = "locked" nocase
@@ -104,8 +104,26 @@ class UltimateAnalyzer:
                 all of them
         }
         """
-        try: return yara.compile(source=rules)
-        except: return None
+
+        # Collect all rule sources: built-in + external .yar files
+        rule_sources = {'builtin': builtin_rules}
+
+        yara_dir = Path(__file__).parent / 'yara_rules'
+        if yara_dir.is_dir():
+            for yar_file in sorted(yara_dir.glob('*.yar')):
+                try:
+                    rule_sources[yar_file.stem] = yar_file.read_text(encoding='utf-8')
+                except Exception as e:
+                    logging.warning(f"Skipping YARA rule {yar_file.name}: {e}")
+
+            loaded = len(rule_sources) - 1  # subtract the builtin
+            print(f"    Loaded {loaded} external YARA rule file(s) from yara_rules/")
+
+        try:
+            return yara.compile(sources=rule_sources)
+        except Exception as e:
+            logging.error(f"YARA compilation failed: {e}")
+            return None
 
     def run(self):
         print(f"{Fore.CYAN}{'='*60}")
