@@ -19,7 +19,7 @@ Upload an APK, get a full malware triage report — permissions, dangerous APIs,
 https://github.com/user-attachments/assets/6f4b0b5f-ef93-4d0a-b5a3-8df1ac6277ce
 
 
-
+</div>
 
 ## Table of Contents
 
