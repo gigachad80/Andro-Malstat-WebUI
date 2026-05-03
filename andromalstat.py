@@ -106,23 +106,36 @@ class UltimateAnalyzer:
         """
 
         # Collect all rule sources: built-in + external .yar files
-        rule_sources = {'builtin': builtin_rules}
+        rule_sources = {}
+        
+        # Validate builtin rules
+        try:
+            yara.compile(source=builtin_rules)
+            rule_sources['builtin'] = builtin_rules
+        except Exception as e:
+            logging.error(f"Built-in YARA compilation failed: {e}")
 
         yara_dir = Path(__file__).parent / 'yara_rules'
         if yara_dir.is_dir():
             for yar_file in sorted(yara_dir.glob('*.yar')):
                 try:
-                    rule_sources[yar_file.stem] = yar_file.read_text(encoding='utf-8')
+                    content = yar_file.read_text(encoding='utf-8')
+                    # Validate individual rule before adding
+                    yara.compile(source=content)
+                    rule_sources[yar_file.stem] = content
                 except Exception as e:
-                    logging.warning(f"Skipping YARA rule {yar_file.name}: {e}")
+                    logging.warning(f"Skipping YARA rule {yar_file.name} due to error: {e}")
 
-            loaded = len(rule_sources) - 1  # subtract the builtin
-            print(f"    Loaded {loaded} external YARA rule file(s) from yara_rules/")
+            loaded = len(rule_sources) - (1 if 'builtin' in rule_sources else 0)
+            print(f"    Loaded {loaded} valid external YARA rule file(s) from yara_rules/")
+
+        if not rule_sources:
+            return None
 
         try:
             return yara.compile(sources=rule_sources)
         except Exception as e:
-            logging.error(f"YARA compilation failed: {e}")
+            logging.error(f"Final YARA compilation failed: {e}")
             return None
 
     def run(self):
