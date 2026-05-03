@@ -9,4 +9,4 @@ rule Dropper_Payload {
         $d = "loadClass"
     condition:
         $a and $b and ($c or $d)
-}c
+}
