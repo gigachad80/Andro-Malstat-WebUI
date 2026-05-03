@@ -10,4 +10,4 @@ rule Anti_Analysis_Tools {
         $e = "/system/bin/su"
     condition:
         2 of them
-}c
+}
